@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: Mit
 pragma solidity ^0.8.19;
 
 // import "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
@@ -13,7 +13,7 @@ import { Verification } from "./Verification/Verification.sol";
 import "./Error/Error.sol";
 
 /**
- * @notice ERC721A
+ * @notice ERC721A with royalties and pseudo random URI
  * @author chixx.eth
  */
 contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
@@ -138,6 +138,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
   function _performPayment(uint256 _price) internal {
     if (paymentMethod) {
       if (msg.value > 0) {
+        // if payment is set with ERC20 return eth send
         (bool success, ) = payable(msg.sender).call{value: msg.value}("");
         if (!success) revert failTransfer();
       }
@@ -311,8 +312,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
       _withdrawERC20(mintUp, mintUpBalance);
       _withdrawERC20(owner, _balance - mintUpBalance);
     } else {
-      uint256 _balance = address(this).balance;
-      uint256 mintUpBalance = _balance * mintUpPart / 10000;
+      uint256 mintUpBalance = address(this).balance * mintUpPart / 10000;
       (bool success,) = payable(address(mintUp)).call{value: mintUpBalance}("");
       if (!success) revert failTransfer();
       (success, ) = payable(address(owner)).call{value: address(this).balance}("");
@@ -339,6 +339,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     external
     onlyOwner
   {
+    if (receiver == address(0) && feeNumerator != 0) revert addressZero();
     if (feeNumerator > 1000) revert royaltiesExceed10percent();
     _setDefaultRoyalty(receiver, feeNumerator);
   }

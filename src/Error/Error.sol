@@ -20,3 +20,5 @@ error royaltiesExceed10percent();
 error notAuthorized();
 
 error failTransfer();
+
+error addressZero();
