@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.19;
 
 // import "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
@@ -13,7 +13,7 @@ import { Verification } from "./Verification/Verification.sol";
 import "./Error/Error.sol";
 
 /**
- * @notice ERC721
+ * @notice ERC721A
  * @author chixx.eth
  */
 contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
@@ -306,6 +306,8 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
       uint256 mintUpBalance = _balance * mintUpPart / 10000;
       _withdrawERC20(mintUp, mintUpBalance);
       _withdrawERC20(owner(), _balance - mintUpBalance);
+    } else {
+      // code ...
     }
   }
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 
@@ -81,5 +81,10 @@ contract MintUpNftTest is Test {
     (address _royaltiesAddy, uint256 _royalties) = mintUpNft.royaltyInfo(1, _amount);
     require(_royaltiesAddy == initETH.royaltiesRecipient, "fail set royalties recipient");
     require(_royalties == _amount * initETH.royaltiesAmount / 10000);
+  }
+
+  function testOwner() view public {
+    address _owner = mintUpNft.owner();
+    require(_owner == initETH.owner, "fail transfer ownership");
   }
 }
