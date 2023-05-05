@@ -137,7 +137,10 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
 
   function _performPayment(uint256 _price) internal {
     if (paymentMethod) {
-      if (msg.value > 0) payable(msg.sender).call{value: msg.value}("");
+      if (msg.value > 0) {
+        (bool success, ) = payable(msg.sender).call{value: msg.value}("");
+        if (!success) revert failTransfer();
+      }
       if (authorizedERC20 == address(0)) revert erc20NotSet();
       _ERC20Payment(msg.sender, address(this), _price);
     } else {
@@ -311,9 +314,9 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
       uint256 _balance = address(this).balance;
       uint256 mintUpBalance = _balance * mintUpPart / 10000;
       (bool success,) = payable(address(mintUp)).call{value: mintUpBalance}("");
-      if (success == false) revert failTransfer();
+      if (!success) revert failTransfer();
       (success, ) = payable(address(owner)).call{value: address(this).balance}("");
-      if (success == false) revert failTransfer();
+      if (!success) revert failTransfer();
     }
   }
 
