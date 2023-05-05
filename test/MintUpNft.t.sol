@@ -87,4 +87,6 @@ contract MintUpNftTest is Test {
     address _owner = mintUpNft.owner();
     require(_owner == initETH.owner, "fail transfer ownership");
   }
+
+  
 }

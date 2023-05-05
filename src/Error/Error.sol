@@ -18,3 +18,5 @@ error invalidSignature();
 error royaltiesExceed10percent();
 
 error notAuthorized();
+
+error failTransfer();
