@@ -46,15 +46,16 @@ contract MintUpNftTest is Test {
     mintUpAddress = vm.addr(mintUpPrivateKey);
     vm.startPrank(owner);
 
-    mintUpNft = new MintUpNft();
+    Initialisaser memory initETH = setInitialisaserETH();
 
+    mintUpNft = new MintUpNft(initETH);
   }
 
-  function setInitialisaserETH() public return(Initialisaser memory) {
+  function setInitialisaserETH() public view returns(Initialisaser memory) {
     Initialisaser memory init;
     init.name = "TEST";
     init.symbol = "TEST";
-    init.baseURI = "baseURI/"
+    init.baseURI = "baseURI/";
     init.crossmintAddy = crossmintAddress;
     init.owner = owner;
     init.signer = signerAddress;
@@ -69,8 +70,12 @@ contract MintUpNftTest is Test {
     init.maxPerAddress = 10;
     init.royaltiesAmount = 1000;
     init.random = false;
-    init.payementMethod = false;
+    init.paymentMethod = false;
     return init;
+  }
+
+  function testInit() public {
+    string memory uri = mintUpNft.baseURI();
   }
 
 }

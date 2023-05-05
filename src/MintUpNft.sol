@@ -4,10 +4,11 @@ pragma solidity ^0.8.13;
 // import "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import "lib/openzeppelin-contracts/contracts/token/common/ERC2981.sol";
-import "lib/ERC721A";
+import "lib/ERC721A/contracts/ERC721A.sol";
 
 import { Initialisaser, Phase } from "./Interfaces/IMintUpNft.sol";
 import { ERC20Payement } from "./PaymentMethod/ERC20Payment.sol";
+import { IERC20 } from "./PaymentMethod/IERC20.sol";
 import { Verification } from "./Verification/Verification.sol";
 import "./Error/Error.sol";
 
@@ -16,21 +17,21 @@ import "./Error/Error.sol";
  * @author chixx.eth
  */
 contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
-  address crossmintAddy;
-  address signer;
-  address mintUp;
+  address public crossmintAddy;
+  address public signer;
+  address public mintUp;
 
-  string baseURI;
+  string public baseURI;
 
-  uint256 maxSupply;
-  uint256 maxPerAddress;
-  uint256 mintUpPart; // 100 => 1%
-  uint256 publicPrice;
-  uint256 whitelistPrice;
-  uint256 saleTimeStarts;
-  uint256 saleTimeEnds;
-  uint256 indexerLength;
-  uint256 currentSupply = 1;
+  uint256 public maxSupply;
+  uint256 public maxPerAddress;
+  uint256 public mintUpPart; // 100 => 1%
+  uint256 public publicPrice;
+  uint256 public whitelistPrice;
+  uint256 public saleTimeStarts;
+  uint256 public saleTimeEnds;
+  uint256 public indexerLength;
+  uint256 public currentSupply;
 
   /**
    * @dev false => NativeToken
@@ -95,7 +96,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     maxPerAddress = initParams.maxPerAddress;
     mintUpPart = initParams.mintUpPart;
     random = initParams.random;
-    payementMethod = initParams.payementMethod;
+    paymentMethod = initParams.paymentMethod;
     unchecked {
       indexerLength = initParams.maxSupply + 1;
     }
@@ -138,7 +139,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     if (paymentMethod) {
       if (msg.value > 0) payable(msg.sender).call{value: msg.value}("");
       if (authorizedERC20 == address(0)) revert erc20NotSet();
-      _ERC20Payment(msg.sender, address(this), amountToPay);
+      _ERC20Payment(msg.sender, address(this), _price);
     } else {
       if (msg.value < _price) revert amountSendIncorrect();
     }
@@ -147,9 +148,9 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
   // MINT FUNCTIONS
   /**
    * @notice mint function for the premint phase
-   * @param amount the amount of nft to mint
-   * @param amountSignature the amount of max nft can be mint in premint
-   * @param signature the signature for premint
+   * @param _quantity the amount of nft to mint
+   * @param _quantitySignature the amount of max nft can be mint in premint
+   * @param _signature the signature for premint
    */
   function premint(uint256 _quantity, uint256 _quantitySignature, bytes memory _signature)
     external
@@ -160,7 +161,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     if (_quantity > _quantitySignature) revert quantityExceed();
     if (_quantity + quantityPremint[msg.sender] > _quantitySignature) revert quantityExceed();
     if (_quantity == 0) revert quantityZero();
-    if (_currentIndex + _quantity > maxSupply) revert maxSupplyReach();
+    if (_nextTokenId() + _quantity > maxSupply) revert maxSupplyReach();
 
     if (random) {
       randomMint(msg.sender, _quantity);
@@ -186,7 +187,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     if (_quantity > _quantitySignature) revert quantityExceed();
     if (_quantity + quantityWhitelist[_to] > _quantitySignature) revert quantityExceed();
     if (_quantity == 0) revert quantityZero();
-    if (_currentIndex + _quantity > maxSupply) revert maxSupplyReach();
+    if (_nextTokenId() + _quantity > maxSupply) revert maxSupplyReach();
 
     _performPayment(whitelistPrice);
 
@@ -204,7 +205,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     external payable checkTime onlyPhase(Phase.publicMint)
   {
     if (_quantity == 0) revert quantityZero();
-    if (_currentIndex + _quantity > maxSupply) revert maxSupplyReach();
+    if (_nextTokenId() + _quantity > maxSupply) revert maxSupplyReach();
     if (quantityPublic[_to] + _quantity > maxPerAddress) revert quantityExceed();
 
     _performPayment(publicPrice);
@@ -227,8 +228,9 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
   function sequentialMint(address _to, uint256 _quantity) internal {
     unchecked {
       for (uint256 i; i < _quantity; ++i) {
-        takenImages[_currentIndex + i] = 1;
-        tokenIDMap[_currentIndex + i] = _currentIndex + i;
+        uint256 nextId = _nextTokenId();
+        takenImages[nextId + i] = 1;
+        tokenIDMap[nextId + i] = nextId + i;
       }
     }
     _mint(_to, _quantity);
@@ -242,11 +244,11 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
   function randomMint(address _to, uint256 _quantity) internal {
     unchecked {
       for (uint256 i; i < _quantity; ++i) {
-        uint256 nextIndexerId = enoughRandom();
+        uint256 nextIndexerId = getRandom();
         uint256 nextImageID = getNextImageID(nextIndexerId);
         assert(takenImages[nextImageID] == 0);
         takenImages[nextImageID] = 1;
-        tokenIDMap[_currentIndex + i] = nextImageID;
+        tokenIDMap[_nextTokenId() + i] = nextImageID;
       }
     }
     _mint(_to, _quantity);
@@ -298,12 +300,12 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
   }
 
   function withdraw() external {
-    if (msg.sender != mintUp || msg.sender != _owner) revert notAuthorized();
+    if (msg.sender != mintUp || msg.sender != owner()) revert notAuthorized();
     if (paymentMethod) {
       uint256 _balance = IERC20(authorizedERC20).balanceOf(address(this));
       uint256 mintUpBalance = _balance * mintUpPart / 10000;
       _withdrawERC20(mintUp, mintUpBalance);
-      _withdrawERC20(_owner, _balance - mintUpBalance);
+      _withdrawERC20(owner(), _balance - mintUpBalance);
     }
   }
 
