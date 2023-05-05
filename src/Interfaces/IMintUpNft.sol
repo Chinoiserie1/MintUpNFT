@@ -19,6 +19,7 @@ struct Initialisaser {
   uint256 maxPerAddress;
   uint96 royaltiesAmount;
   bool random;
+  bool payementMethod;
 }
 
 enum Phase {

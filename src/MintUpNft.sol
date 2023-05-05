@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+// import "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import "lib/openzeppelin-contracts/contracts/token/common/ERC2981.sol";
+import "lib/ERC721A";
 
 import { Initialisaser, Phase } from "./Interfaces/IMintUpNft.sol";
 import { ERC20Payement } from "./PaymentMethod/ERC20Payment.sol";
@@ -12,9 +13,9 @@ import "./Error/Error.sol";
 
 /**
  * @notice ERC721
- * @author chixx.eth aka jérémie Lucotte
+ * @author chixx.eth
  */
-contract MintUpNft is ERC721, ERC2981, Ownable, ERC20Payement {
+contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
   address crossmintAddy;
   address signer;
   address mintUp;
@@ -23,7 +24,7 @@ contract MintUpNft is ERC721, ERC2981, Ownable, ERC20Payement {
 
   uint256 maxSupply;
   uint256 maxPerAddress;
-  uint256 mintUpPart;
+  uint256 mintUpPart; // 100 => 1%
   uint256 publicPrice;
   uint256 whitelistPrice;
   uint256 saleTimeStarts;
@@ -50,27 +51,29 @@ contract MintUpNft is ERC721, ERC2981, Ownable, ERC20Payement {
   /**
    * @dev mapping for track how many mint an address done
    */
-  mapping (address => uint256) amountPremint;
-  mapping (address => uint256) amountWhitelis;
-  mapping (address => uint256) amountPublic;
+  mapping (address => uint256) public quantityPremint;
+  mapping (address => uint256) public quantityWhitelist;
+  mapping (address => uint256) public quantityPublic;
 
   /**
    * @dev mapping for tokenId and the URI
    */
-  mapping(uint256 => uint256) indexer;
-  mapping(uint256 => uint256) tokenIDMap;
-  mapping(uint256 => uint256) takenImages;
+  mapping(uint256 => uint256) public indexer;
+  mapping(uint256 => uint256) public tokenIDMap;
+  mapping(uint256 => uint256) public takenImages;
 
   event NewPhase(Phase newPhase);
   event NewPublicPrice(uint256 _newPublicPrice);
   event NewWhitelistPrice(uint256 _newWhitelistPrice);
-  event Premint(address to, uint256 amount);
+  event Premint(address to, uint256 quantity);
+  event WhitelistMint(address to, uint256 quantity);
+  event PublicMint(address to, uint256 quantity);
 
   function supportsInterface(bytes4 interfaceId)
     public
     view
     virtual
-    override(ERC2981, ERC721)
+    override(ERC2981, ERC721A)
     returns (bool)
   {
     return super.supportsInterface(interfaceId);
@@ -79,7 +82,7 @@ contract MintUpNft is ERC721, ERC2981, Ownable, ERC20Payement {
   constructor(
     Initialisaser memory initParams
   ) 
-    ERC721(initParams.name, initParams.symbol)
+    ERC721A(initParams.name, initParams.symbol)
   {
     baseURI = initParams.baseURI;
     crossmintAddy = initParams.crossmintAddy;
@@ -92,6 +95,7 @@ contract MintUpNft is ERC721, ERC2981, Ownable, ERC20Payement {
     maxPerAddress = initParams.maxPerAddress;
     mintUpPart = initParams.mintUpPart;
     random = initParams.random;
+    payementMethod = initParams.payementMethod;
     unchecked {
       indexerLength = initParams.maxSupply + 1;
     }
@@ -130,6 +134,16 @@ contract MintUpNft is ERC721, ERC2981, Ownable, ERC20Payement {
     _;
   }
 
+  function _performPayment(uint256 _price) internal {
+    if (paymentMethod) {
+      if (msg.value > 0) payable(msg.sender).call{value: msg.value}("");
+      if (authorizedERC20 == address(0)) revert erc20NotSet();
+      _ERC20Payment(msg.sender, address(this), amountToPay);
+    } else {
+      if (msg.value < _price) revert amountSendIncorrect();
+    }
+  }
+
   // MINT FUNCTIONS
   /**
    * @notice mint function for the premint phase
@@ -137,26 +151,108 @@ contract MintUpNft is ERC721, ERC2981, Ownable, ERC20Payement {
    * @param amountSignature the amount of max nft can be mint in premint
    * @param signature the signature for premint
    */
-  function premint(uint256 amount, uint256 amountSignature, bytes memory signature)
+  function premint(uint256 _quantity, uint256 _quantitySignature, bytes memory _signature)
     external
     checkTime
     onlyPhase(Phase.premint)
-    verify(msg.sender, amountSignature, currentPhase, signature)
+    verify(msg.sender, _quantitySignature, currentPhase, _signature)
   {
-    if (amount > amountSignature) revert amountExceed();
-    if (amount + amountPremint[msg.sender] > amountSignature) revert amountExceed();
-    if (amount == 0) revert amountZero();
+    if (_quantity > _quantitySignature) revert quantityExceed();
+    if (_quantity + quantityPremint[msg.sender] > _quantitySignature) revert quantityExceed();
+    if (_quantity == 0) revert quantityZero();
+    if (_currentIndex + _quantity > maxSupply) revert maxSupplyReach();
 
-    
+    if (random) {
+      randomMint(msg.sender, _quantity);
+    } else {
+      sequentialMint(msg.sender, _quantity);
+    }
 
-    amountPremint[msg.sender] += amount;
-    emit Premint(msg.sender, amount);
+    quantityPremint[msg.sender] += _quantity;
+    emit Premint(msg.sender, _quantity);
   }
 
-  function sequentialMint() internal {
-    
+  function whitelistMint(
+    address _to,
+    uint256 _quantity,
+    uint256 _quantitySignature,
+    bytes memory _signature
+  ) external
+    payable
+    checkTime
+    onlyPhase(Phase.whitelistMint)
+    verify(_to, _quantitySignature, currentPhase, _signature)
+  {
+    if (_quantity > _quantitySignature) revert quantityExceed();
+    if (_quantity + quantityWhitelist[_to] > _quantitySignature) revert quantityExceed();
+    if (_quantity == 0) revert quantityZero();
+    if (_currentIndex + _quantity > maxSupply) revert maxSupplyReach();
+
+    _performPayment(whitelistPrice);
+
+    if (random) {
+      randomMint(_to, _quantity);
+    } else {
+      sequentialMint(_to, _quantity);
+    }
+
+    quantityWhitelist[_to] += _quantity;
+    emit WhitelistMint(_to, _quantity);
   }
 
+  function publicMint(address _to, uint256 _quantity)
+    external payable checkTime onlyPhase(Phase.publicMint)
+  {
+    if (_quantity == 0) revert quantityZero();
+    if (_currentIndex + _quantity > maxSupply) revert maxSupplyReach();
+    if (quantityPublic[_to] + _quantity > maxPerAddress) revert quantityExceed();
+
+    _performPayment(publicPrice);
+
+    if (random) {
+      randomMint(_to, _quantity);
+    } else {
+      sequentialMint(_to, _quantity);
+    }
+
+    quantityPublic[_to] += _quantity;
+    emit PublicMint(_to, _quantity);
+  }
+
+  /**
+   * @notice perform sequential mint
+   * @param _to address of the receiver
+   * @param _quantity quantity receiver will receive
+   */
+  function sequentialMint(address _to, uint256 _quantity) internal {
+    unchecked {
+      for (uint256 i; i < _quantity; ++i) {
+        takenImages[_currentIndex + i] = 1;
+        tokenIDMap[_currentIndex + i] = _currentIndex + i;
+      }
+    }
+    _mint(_to, _quantity);
+  }
+
+  /**
+   * @notice perform random mint
+   * @param _to address of the receiver
+   * @param _quantity quantity receiver will receive
+   */
+  function randomMint(address _to, uint256 _quantity) internal {
+    unchecked {
+      for (uint256 i; i < _quantity; ++i) {
+        uint256 nextIndexerId = enoughRandom();
+        uint256 nextImageID = getNextImageID(nextIndexerId);
+        assert(takenImages[nextImageID] == 0);
+        takenImages[nextImageID] = 1;
+        tokenIDMap[_currentIndex + i] = nextImageID;
+      }
+    }
+    _mint(_to, _quantity);
+  }
+
+  // PERFORM RANDOM
   /**
    * @dev get the correct next tokenId for the URI
    *      see { https://en.wikipedia.org/wiki/Fisher–Yates_shuffle }
@@ -201,6 +297,16 @@ contract MintUpNft is ERC721, ERC2981, Ownable, ERC20Payement {
     return (computeRandom == 0 ? 1 : computeRandom);
   }
 
+  function withdraw() external {
+    if (msg.sender != mintUp || msg.sender != _owner) revert notAuthorized();
+    if (paymentMethod) {
+      uint256 _balance = IERC20(authorizedERC20).balanceOf(address(this));
+      uint256 mintUpBalance = _balance * mintUpPart / 10000;
+      _withdrawERC20(mintUp, mintUpBalance);
+      _withdrawERC20(_owner, _balance - mintUpBalance);
+    }
+  }
+
   // SETTER
   /**
    * @notice set the current phase
@@ -240,5 +346,9 @@ contract MintUpNft is ERC721, ERC2981, Ownable, ERC20Payement {
   function setWhitelistPrice(uint256 _newPrice) external onlyOwner {
     whitelistPrice = _newPrice;
     emit NewWhitelistPrice(_newPrice);
+  }
+
+  function _startTokenId() internal override view virtual returns (uint256) {
+    return 1;
   }
 }

@@ -6,9 +6,15 @@ error saleEnded();
 
 error incorectPhase();
 
-error amountExceed();
-error amountZero();
+error maxSupplyReach();
+error quantityExceed();
+error quantityZero();
+
+error amountSendIncorrect();
+error erc20NotSet();
 
 error invalidSignature();
 
 error royaltiesExceed10percent();
+
+error notAuthorized();
