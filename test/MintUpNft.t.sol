@@ -27,6 +27,8 @@ contract MintUpNftTest is Test {
   uint256 internal mintUpPrivateKey;
   address internal mintUpAddress;
 
+  Initialisaser initETH;
+
   function setUp() public {
     ownerPrivateKey = 0xA11CE;
     owner = vm.addr(ownerPrivateKey);
@@ -46,7 +48,7 @@ contract MintUpNftTest is Test {
     mintUpAddress = vm.addr(mintUpPrivateKey);
     vm.startPrank(owner);
 
-    Initialisaser memory initETH = setInitialisaserETH();
+    initETH = setInitialisaserETH();
 
     mintUpNft = new MintUpNft(initETH);
   }
@@ -74,8 +76,10 @@ contract MintUpNftTest is Test {
     return init;
   }
 
-  function testInit() public {
-    string memory uri = mintUpNft.baseURI();
+  function testDefaultRoyalties() view public {
+    uint256 _amount = 1000;
+    (address _royaltiesAddy, uint256 _royalties) = mintUpNft.royaltyInfo(1, _amount);
+    require(_royaltiesAddy == initETH.royaltiesRecipient, "fail set royalties recipient");
+    require(_royalties == _amount * initETH.royaltiesAmount / 10000);
   }
-
 }
