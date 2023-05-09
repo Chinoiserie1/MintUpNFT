@@ -365,4 +365,13 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
   function _startTokenId() internal override view virtual returns (uint256) {
     return 1;
   }
+
+  function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+      uint256 imageID = tokenIDMap[tokenId];
+      return (
+        bytes(baseURI).length > 0
+          ? string(abi.encodePacked(baseURI, _toString(imageID)))
+          : ""
+      );
+  }
 }
