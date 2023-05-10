@@ -13,7 +13,7 @@ import { Verification } from "./Verification/Verification.sol";
 import "./Error/Error.sol";
 
 /**
- * @notice ERC721A with royalties and pseudo random URI
+ * @notice ERC721A with royalties and pseudo random URI for mintup.io
  * @author chixx.eth
  */
 contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
@@ -31,7 +31,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
   uint256 public saleTimeStarts;
   uint256 public saleTimeEnds;
   uint256 public indexerLength;
-  uint256 public currentSupply;
+  // uint256 public currentSupply;
 
   /**
    * @dev false => NativeToken
@@ -286,7 +286,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
    * @dev compute the pseudo random value
    */
   function getRandom() internal view returns (uint256) {
-    if (maxSupply - currentSupply == 0) return 0;
+    if (maxSupply - totalSupply() == 0) return 1;
     uint256 computeRandom = uint256(
       keccak256(
         abi.encodePacked(
