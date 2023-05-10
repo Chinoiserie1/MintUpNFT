@@ -101,7 +101,6 @@ contract MintUpNftTest is Test {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
     bytes memory sign = signMessage(user1, 2, Phase.premint);
-    console.logBytes(sign);
     vm.stopPrank();
     vm.startPrank(user1);
     mintUpNft.premint(2, 2, sign);
@@ -121,10 +120,23 @@ contract MintUpNftTest is Test {
   function testSaleIncorectPhase() public {
     vm.warp(block.timestamp + 101);
     bytes memory sign = signMessage(user1, 2, Phase.premint);
-    console.logBytes(sign);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.expectRevert(incorectPhase.selector);
     mintUpNft.premint(2, 2, sign);
+  }
+
+  function testPremintUser1SuccessfulWith2calls() public {
+    mintUpNft.setPhase(Phase.premint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(user1, 2, Phase.premint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    mintUpNft.premint(1, 2, sign);
+    uint256 balanceAfter = mintUpNft.balanceOf(user1);
+    require(balanceAfter == 1, "fail to mint 1");
+    mintUpNft.premint(1, 2, sign);
+    balanceAfter = mintUpNft.balanceOf(user1);
+    require(balanceAfter == 2, "fail to mint 1 more");
   }
 }
