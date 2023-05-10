@@ -189,4 +189,14 @@ contract MintUpNftTest is Test {
     vm.expectRevert(invalidSignature.selector);
     mintUpNft.premint(0, 1, sign);
   }
+
+  function testPremintIncorrectSignature() public {
+    mintUpNft.setPhase(Phase.premint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(user1, 1, Phase.whitelistMint);
+    vm.stopPrank();
+    vm.startPrank(user2);
+    vm.expectRevert(invalidSignature.selector);
+    mintUpNft.premint(1, 1, sign);
+  }
 }
