@@ -108,4 +108,13 @@ contract MintUpNftTest is Test {
     uint256 balanceAfter = mintUpNft.balanceOf(user1);
     require(balanceAfter == 2, "fail to mint");
   }
+
+  function testSaleNotStarted() public {
+    mintUpNft.setPhase(Phase.premint);
+    bytes memory sign = signMessage(user1, 2, Phase.premint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert(saleNotStarted.selector);
+    mintUpNft.premint(2, 2, sign);
+  }
 }
