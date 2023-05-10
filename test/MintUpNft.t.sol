@@ -139,4 +139,14 @@ contract MintUpNftTest is Test {
     balanceAfter = mintUpNft.balanceOf(user1);
     require(balanceAfter == 2, "fail to mint 1 more");
   }
+
+  function testPremintFailMint3withWitelistOf2() public {
+    mintUpNft.setPhase(Phase.premint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(user1, 2, Phase.premint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert(quantityExceed.selector);
+    mintUpNft.premint(3, 2, sign);
+  }
 }
