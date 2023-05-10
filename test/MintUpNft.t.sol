@@ -195,8 +195,18 @@ contract MintUpNftTest is Test {
     vm.warp(block.timestamp + 101);
     bytes memory sign = signMessage(user1, 1, Phase.whitelistMint);
     vm.stopPrank();
-    vm.startPrank(user2);
+    vm.startPrank(user1);
     vm.expectRevert(invalidSignature.selector);
     mintUpNft.premint(1, 1, sign);
+  }
+
+  function testPremintFailMintMoreThanMaxSupplyIn1Call() public {
+    mintUpNft.setPhase(Phase.premint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(user1, 101, Phase.premint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert(maxSupplyReach.selector);
+    mintUpNft.premint(101, 101, sign);
   }
 }
