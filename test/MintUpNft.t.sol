@@ -149,4 +149,15 @@ contract MintUpNftTest is Test {
     vm.expectRevert(quantityExceed.selector);
     mintUpNft.premint(3, 2, sign);
   }
+
+  function testPremintFailMint2andMint1After() public {
+    mintUpNft.setPhase(Phase.premint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(user1, 2, Phase.premint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    mintUpNft.premint(2, 2, sign);
+    vm.expectRevert(quantityExceed.selector);
+    mintUpNft.premint(1, 2, sign);
+  }
 }
