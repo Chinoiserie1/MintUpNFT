@@ -242,6 +242,16 @@ contract MintUpNftTest is Test {
     mintUpNft.premint(100, 100, sign);
   }
 
+  function testPremintFailSalesEnded() public {
+    mintUpNft.setPhase(Phase.premint);
+    vm.warp(block.timestamp + 4 hours);
+    bytes memory sign = signMessage(user1, 10, Phase.premint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert(saleEnded.selector);
+    mintUpNft.premint(10, 10, sign);
+  }
+
   function testPremintRandom() public {
     mintUpNftRandom.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
