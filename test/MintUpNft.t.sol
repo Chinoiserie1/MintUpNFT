@@ -85,6 +85,12 @@ contract MintUpNftTest is Test {
     return init;
   }
 
+  function setInitialisaserETHRandom() public view returns(Initialisaser memory) {
+    Initialisaser memory init = setInitialisaserETH();
+    init.random = true;
+    return init;
+  }
+
   function testDefaultRoyalties() view public {
     uint256 _amount = 1000;
     (address _royaltiesAddy, uint256 _royalties) = mintUpNft.royaltyInfo(1, _amount);
