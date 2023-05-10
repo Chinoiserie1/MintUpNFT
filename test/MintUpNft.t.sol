@@ -150,7 +150,7 @@ contract MintUpNftTest is Test {
     mintUpNft.premint(3, 2, sign);
   }
 
-  function testPremintFailMint2andMint1After() public {
+  function testPremintFailMint2andMint1AfterWith2Whitelist() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
     bytes memory sign = signMessage(user1, 2, Phase.premint);
