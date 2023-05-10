@@ -6,6 +6,7 @@ import "forge-std/Test.sol";
 import "../src/MintUpNft.sol";
 import "../src/Error/Error.sol";
 import "../src/Interfaces/IMintUpNft.sol";
+import { Verification } from "../src/Verification/Verification.sol";
 
 contract MintUpNftTest is Test {
   MintUpNft public mintUpNft;
@@ -53,6 +54,14 @@ contract MintUpNftTest is Test {
     mintUpNft = new MintUpNft(initETH);
   }
 
+  function signMessage(address _to, uint256 _amount, Phase _phase) internal view returns (bytes memory) {
+    bytes32 hash = Verification.getMessageHash(_to, _amount, _phase);
+    bytes32 finalHash = Verification.getEthSignedMessageHash(hash);
+    (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPrivateKey, finalHash);
+    bytes memory signature = abi.encodePacked(r, s, v);
+    return signature;
+  }
+
   function setInitialisaserETH() public view returns(Initialisaser memory) {
     Initialisaser memory init;
     init.name = "TEST";
@@ -88,5 +97,15 @@ contract MintUpNftTest is Test {
     require(_owner == initETH.owner, "fail transfer ownership");
   }
 
-  
+  function testPremintUser1Successful() public {
+    mintUpNft.setPhase(Phase.premint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(user1, 2, Phase.premint);
+    console.logBytes(sign);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    mintUpNft.premint(2, 2, sign);
+    uint256 balanceAfter = mintUpNft.balanceOf(user1);
+    require(balanceAfter == 2, "fail to mint");
+  }
 }
