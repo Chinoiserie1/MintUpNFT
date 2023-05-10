@@ -92,6 +92,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     saleTimeStarts = initParams.saleTimeStarts;
     saleTimeEnds = initParams.saleTimeEnds;
     maxSupply = initParams.maxSupply;
+    whitelistPrice = initParams.whitelistPrice;
     publicPrice = initParams.publicPrice;
     maxPerAddress = initParams.maxPerAddress;
     mintUpPart = initParams.mintUpPart;
@@ -193,7 +194,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     if (_quantity == 0) revert quantityZero();
     if (_nextTokenId() + _quantity > maxSupply + 1) revert maxSupplyReach();
 
-    _performPayment(whitelistPrice);
+    _performPayment(whitelistPrice * _quantity);
 
     if (random) {
       randomMint(_to, _quantity);
@@ -212,7 +213,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     if (_nextTokenId() + _quantity > maxSupply + 1) revert maxSupplyReach();
     if (quantityPublic[_to] + _quantity > maxPerAddress) revert quantityExceed();
 
-    _performPayment(publicPrice);
+    _performPayment(publicPrice * _quantity);
 
     if (random) {
       randomMint(_to, _quantity);

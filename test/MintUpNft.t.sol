@@ -433,4 +433,15 @@ contract MintUpNftTest is Test {
     vm.expectRevert(saleEnded.selector);
     mintUpNft.whitelistMint{ value: initETH.whitelistPrice * 2 }(user1, 2, 2, sign);
   }
+
+  function testWhitelistMintFailAmountSendIncorrect() public {
+    mintUpNft.setPhase(Phase.whitelistMint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(user1, 2, Phase.whitelistMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 1 ether);
+    vm.expectRevert(amountSendIncorrect.selector);
+    mintUpNft.whitelistMint{ value : initETH.whitelistPrice }(user1, 2, 2, sign);
+  }
 }
