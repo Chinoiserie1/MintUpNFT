@@ -161,7 +161,7 @@ contract MintUpNftTest is Test {
     mintUpNft.premint(1, 2, sign);
   }
 
-  function g() public {
+  function testPremintWithExceedMaxPerAddressNeedToSuccess() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
     bytes memory sign = signMessage(user1, 20, Phase.premint);
