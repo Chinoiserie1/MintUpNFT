@@ -171,12 +171,22 @@ contract MintUpNftTest is Test {
   }
 
   function testPremintFailWithAmountZero() public {
-     mintUpNft.setPhase(Phase.premint);
+    mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
     bytes memory sign = signMessage(user1, 1, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.expectRevert(quantityZero.selector);
+    mintUpNft.premint(0, 1, sign);
+  }
+
+  function testPremintFailIncorrectUserWhitelist() public {
+    mintUpNft.setPhase(Phase.premint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(user1, 1, Phase.premint);
+    vm.stopPrank();
+    vm.startPrank(user2);
+    vm.expectRevert(invalidSignature.selector);
     mintUpNft.premint(0, 1, sign);
   }
 }
