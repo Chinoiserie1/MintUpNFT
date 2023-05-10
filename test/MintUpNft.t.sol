@@ -108,6 +108,7 @@ contract MintUpNftTest is Test {
     require(_owner == initETH.owner, "fail transfer ownership");
   }
 
+  // PREMINT
   function testPremintUser1Successful() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
@@ -137,7 +138,7 @@ contract MintUpNftTest is Test {
     mintUpNft.premint(2, 2, sign);
   }
 
-  function testPremintUser1SuccessfulWith2calls() public {
+  function testPremintUser1SuccessfullWith2calls() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
     bytes memory sign = signMessage(user1, 2, Phase.premint);
@@ -378,5 +379,16 @@ contract MintUpNftTest is Test {
       && keccak256(abi.encode(URI10)) != keccak256(abi.encode(URI1))
       , "Fail Random"
     );
+  }
+
+  // whitelistMint
+  function testWhitelistMint() public {
+    mintUpNft.setPhase(Phase.whitelistMint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(user1, 2, Phase.whitelistMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 1 ether);
+    mintUpNft.whitelistMint{ value: initETH.whitelistPrice * 2 }(user1, 2, 2, sign);
   }
 }
