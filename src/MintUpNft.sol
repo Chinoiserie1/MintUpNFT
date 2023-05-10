@@ -165,7 +165,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     if (_quantity > _quantitySignature) revert quantityExceed();
     if (_quantity + quantityPremint[msg.sender] > _quantitySignature) revert quantityExceed();
     if (_quantity == 0) revert quantityZero();
-    if (_nextTokenId() + _quantity > maxSupply) revert maxSupplyReach();
+    if (_nextTokenId() + _quantity > maxSupply + 1) revert maxSupplyReach();
 
     if (random) {
       randomMint(msg.sender, _quantity);
@@ -191,7 +191,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     if (_quantity > _quantitySignature) revert quantityExceed();
     if (_quantity + quantityWhitelist[_to] > _quantitySignature) revert quantityExceed();
     if (_quantity == 0) revert quantityZero();
-    if (_nextTokenId() + _quantity > maxSupply) revert maxSupplyReach();
+    if (_nextTokenId() + _quantity > maxSupply + 1) revert maxSupplyReach();
 
     _performPayment(whitelistPrice);
 
@@ -209,7 +209,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     external payable checkTime onlyPhase(Phase.publicMint)
   {
     if (_quantity == 0) revert quantityZero();
-    if (_nextTokenId() + _quantity > maxSupply) revert maxSupplyReach();
+    if (_nextTokenId() + _quantity > maxSupply + 1) revert maxSupplyReach();
     if (quantityPublic[_to] + _quantity > maxPerAddress) revert quantityExceed();
 
     _performPayment(publicPrice);
