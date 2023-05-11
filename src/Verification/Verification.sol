@@ -4,9 +4,10 @@ pragma solidity ^0.8.19;
 import { Phase } from "../Interfaces/IMintUpNft.sol";
 
 library Verification {
-  function getMessageHash(address _to, uint256 _amount, Phase _phase) internal pure returns (bytes32) {
+  function getMessageHash(address _contract, address _to, uint256 _amount, Phase _phase) internal pure returns (bytes32) {
     return keccak256(
       abi.encodePacked(
+        _contract,
         _to,
         _amount,
         _phase
@@ -15,6 +16,7 @@ library Verification {
   }
 
   function verifySignature(
+    address _contract,
     address _signer,
     address _to,
     uint256 _amount,
@@ -25,7 +27,7 @@ library Verification {
     pure
     returns (bool)
   {
-    bytes32 messageHash = getMessageHash(_to, _amount, _phase);
+    bytes32 messageHash = getMessageHash(_contract, _to, _amount, _phase);
     bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
 
     return recoverSigner(ethSignedMessageHash, _signature) == _signer;

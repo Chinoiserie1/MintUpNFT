@@ -58,8 +58,8 @@ contract MintUpNftTest is Test {
     mintUpNftRandom = new MintUpNft(initETHRandom);
   }
 
-  function signMessage(address _to, uint256 _amount, Phase _phase) internal view returns (bytes memory) {
-    bytes32 hash = Verification.getMessageHash(_to, _amount, _phase);
+  function signMessage(address _contract, address _to, uint256 _amount, Phase _phase) internal view returns (bytes memory) {
+    bytes32 hash = Verification.getMessageHash(_contract, _to, _amount, _phase);
     bytes32 finalHash = Verification.getEthSignedMessageHash(hash);
     (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPrivateKey, finalHash);
     bytes memory signature = abi.encodePacked(r, s, v);
@@ -112,7 +112,7 @@ contract MintUpNftTest is Test {
   function testPremintUser1Successful() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 2, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     mintUpNft.premint(2, 2, sign);
@@ -122,7 +122,7 @@ contract MintUpNftTest is Test {
 
   function testSaleNotStarted() public {
     mintUpNft.setPhase(Phase.premint);
-    bytes memory sign = signMessage(user1, 2, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.expectRevert(saleNotStarted.selector);
@@ -131,7 +131,7 @@ contract MintUpNftTest is Test {
 
   function testSaleIncorectPhase() public {
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 2, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.expectRevert(incorectPhase.selector);
@@ -141,7 +141,7 @@ contract MintUpNftTest is Test {
   function testPremintUser1SuccessfullWith2calls() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 2, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     mintUpNft.premint(1, 2, sign);
@@ -155,7 +155,7 @@ contract MintUpNftTest is Test {
   function testPremintFailMint3withWitelistOf2() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 2, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.expectRevert(quantityExceed.selector);
@@ -165,7 +165,7 @@ contract MintUpNftTest is Test {
   function testPremintFailMint2andMint1AfterWith2Whitelist() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 2, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     mintUpNft.premint(2, 2, sign);
@@ -176,7 +176,7 @@ contract MintUpNftTest is Test {
   function testPremintWithExceedMaxPerAddressNeedToSuccess() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 20, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 20, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     mintUpNft.premint(20, 20, sign);
@@ -185,7 +185,7 @@ contract MintUpNftTest is Test {
   function testPremintFailWithAmountZero() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 1, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 1, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.expectRevert(quantityZero.selector);
@@ -195,7 +195,7 @@ contract MintUpNftTest is Test {
   function testPremintFailIncorrectUserWhitelist() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 1, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 1, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user2);
     vm.expectRevert(invalidSignature.selector);
@@ -205,7 +205,7 @@ contract MintUpNftTest is Test {
   function testPremintIncorrectSignature() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 1, Phase.whitelistMint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 1, Phase.whitelistMint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.expectRevert(invalidSignature.selector);
@@ -215,7 +215,7 @@ contract MintUpNftTest is Test {
   function testPremintFailMintMoreThanMaxSupplyIn1Call() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 101, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 101, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.expectRevert(maxSupplyReach.selector);
@@ -225,7 +225,7 @@ contract MintUpNftTest is Test {
   function testPremintFailMintMoreThanMaxSupplyMultipleCall() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 101, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 101, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     mintUpNft.premint(100, 101, sign);
@@ -236,7 +236,7 @@ contract MintUpNftTest is Test {
   function testPremintAllSupply() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 100, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 100, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     mintUpNft.premint(100, 100, sign);
@@ -245,7 +245,7 @@ contract MintUpNftTest is Test {
   function testPremintFailSalesEnded() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 4 hours);
-    bytes memory sign = signMessage(user1, 10, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 10, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.expectRevert(saleEnded.selector);
@@ -255,7 +255,7 @@ contract MintUpNftTest is Test {
   function testPremintRandom() public {
     mintUpNftRandom.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 10, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNftRandom), user1, 10, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     mintUpNftRandom.premint(10, 10, sign);
@@ -395,7 +395,7 @@ contract MintUpNftTest is Test {
   function testWhitelistMint() public {
     mintUpNft.setPhase(Phase.whitelistMint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 2, Phase.whitelistMint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.whitelistMint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 1 ether);
@@ -405,7 +405,7 @@ contract MintUpNftTest is Test {
   function testWhitelistMintFailIncorrectPhase() public {
     mintUpNft.setPhase(Phase.premint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 2, Phase.whitelistMint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.whitelistMint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 1 ether);
@@ -415,7 +415,7 @@ contract MintUpNftTest is Test {
 
   function testWhitelistMintFailSaleNotStarted() public {
     mintUpNft.setPhase(Phase.whitelistMint);
-    bytes memory sign = signMessage(user1, 2, Phase.whitelistMint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.whitelistMint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 1 ether);
@@ -426,7 +426,7 @@ contract MintUpNftTest is Test {
   function testWhitelistMintFailSaleEnded() public {
     mintUpNft.setPhase(Phase.whitelistMint);
     vm.warp(block.timestamp + 4 hours);
-    bytes memory sign = signMessage(user1, 2, Phase.whitelistMint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.whitelistMint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 1 ether);
@@ -437,7 +437,7 @@ contract MintUpNftTest is Test {
   function testWhitelistMintFailAmountSendIncorrect() public {
     mintUpNft.setPhase(Phase.whitelistMint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 2, Phase.whitelistMint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.whitelistMint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 1 ether);
@@ -448,7 +448,7 @@ contract MintUpNftTest is Test {
   function testWhitelistMintFailIncorrectUserWhitelist() public {
     mintUpNft.setPhase(Phase.whitelistMint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user2, 2, Phase.whitelistMint);
+    bytes memory sign = signMessage(address(mintUpNft), user2, 2, Phase.whitelistMint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 1 ether);
@@ -459,7 +459,7 @@ contract MintUpNftTest is Test {
   function testWhitelistMintFailIncorrectPhaseInSignature() public {
     mintUpNft.setPhase(Phase.whitelistMint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 2, Phase.premint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.premint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 1 ether);
@@ -470,7 +470,7 @@ contract MintUpNftTest is Test {
   function testWhitelistMintInMultipleCall() public {
     mintUpNft.setPhase(Phase.whitelistMint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 2, Phase.whitelistMint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.whitelistMint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 1 ether);
@@ -483,7 +483,7 @@ contract MintUpNftTest is Test {
   function testWhitelistMintFailExceedAllowedWhitelist() public {
     mintUpNft.setPhase(Phase.whitelistMint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 2, Phase.whitelistMint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.whitelistMint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 2 ether);
@@ -495,14 +495,19 @@ contract MintUpNftTest is Test {
     mintUpNft.whitelistMint{ value: initETH.whitelistPrice }(user1, 1, 2, sign);
   }
 
-  function g() public {
+  function testWhitelistMintFailAmountZero() public {
     mintUpNft.setPhase(Phase.whitelistMint);
     vm.warp(block.timestamp + 101);
-    bytes memory sign = signMessage(user1, 2, Phase.whitelistMint);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 2, Phase.whitelistMint);
     vm.stopPrank();
     vm.startPrank(user1);
     vm.deal(user1, 1 ether);
     vm.expectRevert(quantityZero.selector);
     mintUpNft.whitelistMint{ value: initETH.whitelistPrice * 2 }(user1, 0, 2, sign);
+  }
+
+  function testWhitelistMintRandom() public {
+    mintUpNftRandom.setPhase(Phase.whitelistMint);
+
   }
 }

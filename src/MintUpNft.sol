@@ -132,7 +132,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
    * @param _sign the signature
    */
   modifier verify(address _to, uint256 _amount, Phase _phase, bytes memory _sign) {
-    if (!Verification.verifySignature(signer, _to, _amount, _phase, _sign)) revert invalidSignature();
+    if (!Verification.verifySignature(address(this), signer, _to, _amount, _phase, _sign)) revert invalidSignature();
     _;
   }
 
