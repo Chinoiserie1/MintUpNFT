@@ -665,4 +665,16 @@ contract MintUpNftTest is Test {
     vm.expectRevert(invalidSignature.selector);
     mintUpNft.whitelistMint(user1, 2, 2, sign);
   }
+
+  function testWhitelistMintAllSupply() public {
+    mintUpNft.setPhase(Phase.whitelistMint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 100, Phase.whitelistMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    mintUpNft.whitelistMint{ value: initETH.whitelistPrice * 100 }(user1, 100, 100, sign);
+    uint256 balanceAfter = mintUpNft.balanceOf(user1);
+    require(balanceAfter == 100, "fail mint all supply");
+  }
 }
