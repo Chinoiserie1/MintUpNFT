@@ -710,4 +710,14 @@ contract MintUpNftTest is Test {
     vm.deal(user1, 2 ether);
     mintUpNft.publicMint{ value: initETH.publicPrice * 2 }(user1, 2);
   }
+
+  function testPublicMintFailInvalidAmountSend() public {
+    mintUpNft.setPhase(Phase.publicMint);
+    vm.warp(block.timestamp + 101);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 2 ether);
+    vm.expectRevert(amountSendIncorrect.selector);
+    mintUpNft.publicMint{ value: initETH.publicPrice }(user1, 2);
+  }
 }
