@@ -690,6 +690,17 @@ contract MintUpNftTest is Test {
     require(balanceAfter == 2, "fail mint for another account");
   }
 
+  function testWhitelistMintFailExceedMaxSupply() public {
+    mintUpNft.setPhase(Phase.whitelistMint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 101, Phase.whitelistMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    vm.expectRevert(maxSupplyReach.selector);
+    mintUpNft.whitelistMint{ value: initETH.whitelistPrice * 101 }(user1, 101, 101, sign);
+  }
+
   // PUBLICMINT
   function testPublicMint() public {
     mintUpNft.setPhase(Phase.publicMint);
