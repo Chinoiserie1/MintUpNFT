@@ -391,6 +391,16 @@ contract MintUpNftTest is Test {
     );
   }
 
+  function testPremintFailWithAnotherContractSignature() public {
+    mintUpNft.setPhase(Phase.premint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(address(mintUpNftRandom), user1, 2, Phase.premint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert(invalidSignature.selector);
+    mintUpNft.premint(2, 2, sign);
+  }
+
   // whitelistMint
   function testWhitelistMint() public {
     mintUpNft.setPhase(Phase.whitelistMint);
