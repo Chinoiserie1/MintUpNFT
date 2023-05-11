@@ -401,7 +401,7 @@ contract MintUpNftTest is Test {
     mintUpNft.premint(2, 2, sign);
   }
 
-  // whitelistMint
+  // WHITELISTMINT
   function testWhitelistMint() public {
     mintUpNft.setPhase(Phase.whitelistMint);
     vm.warp(block.timestamp + 101);
@@ -688,5 +688,15 @@ contract MintUpNftTest is Test {
     mintUpNft.whitelistMint{ value: initETH.whitelistPrice * 2 }(user2, 2, 2, sign);
     uint256 balanceAfter = mintUpNft.balanceOf(user2);
     require(balanceAfter == 2, "fail mint for another account");
+  }
+
+  // PUBLICMINT
+  function testPublicMint() public {
+    mintUpNft.setPhase(Phase.publicMint);
+    vm.warp(block.timestamp + 101);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 2 ether);
+    mintUpNft.publicMint{ value: initETH.publicPrice * 2 }(user1, 2);
   }
 }
