@@ -655,4 +655,14 @@ contract MintUpNftTest is Test {
       , "Fail Random"
     );
   }
+
+  function testWhitelistMintFailWithAnotherContractSignature() public {
+    mintUpNft.setPhase(Phase.whitelistMint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(address(mintUpNftRandom), user1, 2, Phase.whitelistMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert(invalidSignature.selector);
+    mintUpNft.whitelistMint(user1, 2, 2, sign);
+  }
 }
