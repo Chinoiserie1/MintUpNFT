@@ -287,7 +287,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
    * @dev compute the pseudo random value
    */
   function getRandom() internal view returns (uint256) {
-    if (maxSupply - totalSupply() == 0) return 1;
+    if (maxSupply + 1 - totalSupply() == 0) return 1;
     uint256 computeRandom = uint256(
       keccak256(
         abi.encodePacked(
