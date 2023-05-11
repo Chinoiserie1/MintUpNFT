@@ -169,12 +169,12 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     if (_nextTokenId() + _quantity > maxSupply + 1) revert maxSupplyReach();
 
     if (random) {
-      randomMint(msg.sender, _quantity);
+      _randomMint(msg.sender, _quantity);
     } else {
-      sequentialMint(msg.sender, _quantity);
+      _sequentialMint(msg.sender, _quantity);
     }
 
-    quantityPremint[msg.sender] += _quantity;
+    unchecked { quantityPremint[msg.sender] += _quantity; }
     emit Premint(msg.sender, _quantity);
   }
 
@@ -197,12 +197,12 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     _performPayment(whitelistPrice * _quantity);
 
     if (random) {
-      randomMint(_to, _quantity);
+      _randomMint(_to, _quantity);
     } else {
-      sequentialMint(_to, _quantity);
+      _sequentialMint(_to, _quantity);
     }
 
-    quantityWhitelist[_to] += _quantity;
+    unchecked { quantityWhitelist[_to] += _quantity; }
     emit WhitelistMint(_to, _quantity);
   }
 
@@ -216,12 +216,12 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     _performPayment(publicPrice * _quantity);
 
     if (random) {
-      randomMint(_to, _quantity);
+      _randomMint(_to, _quantity);
     } else {
-      sequentialMint(_to, _quantity);
+      _sequentialMint(_to, _quantity);
     }
 
-    quantityPublic[_to] += _quantity;
+    unchecked { quantityPublic[_to] += _quantity; }
     emit PublicMint(_to, _quantity);
   }
 
@@ -230,7 +230,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
    * @param _to address of the receiver
    * @param _quantity quantity receiver will receive
    */
-  function sequentialMint(address _to, uint256 _quantity) internal {
+  function _sequentialMint(address _to, uint256 _quantity) internal {
     unchecked {
       for (uint256 i; i < _quantity; ++i) {
         uint256 nextId = _nextTokenId();
@@ -246,7 +246,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
    * @param _to address of the receiver
    * @param _quantity quantity receiver will receive
    */
-  function randomMint(address _to, uint256 _quantity) internal {
+  function _randomMint(address _to, uint256 _quantity) internal {
     unchecked {
       for (uint256 i; i < _quantity; ++i) {
         uint256 nextIndexerId = getRandom();

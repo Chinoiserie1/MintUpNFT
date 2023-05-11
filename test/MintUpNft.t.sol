@@ -481,7 +481,7 @@ contract MintUpNftTest is Test {
   }
 
   function testWhitelistMintFailExceedAllowedWhitelist() public {
-     mintUpNft.setPhase(Phase.whitelistMint);
+    mintUpNft.setPhase(Phase.whitelistMint);
     vm.warp(block.timestamp + 101);
     bytes memory sign = signMessage(user1, 2, Phase.whitelistMint);
     vm.stopPrank();
