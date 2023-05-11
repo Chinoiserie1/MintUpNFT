@@ -508,6 +508,141 @@ contract MintUpNftTest is Test {
 
   function testWhitelistMintRandom() public {
     mintUpNftRandom.setPhase(Phase.whitelistMint);
-
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(address(mintUpNftRandom), user1, 10, Phase.whitelistMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 10 ether);
+    mintUpNftRandom.whitelistMint{ value: initETH.whitelistPrice * 10 }(user1, 10, 10, sign);
+    string memory URI1 = mintUpNftRandom.tokenURI(1);
+    string memory URI2 = mintUpNftRandom.tokenURI(2);
+    string memory URI3 = mintUpNftRandom.tokenURI(3);
+    string memory URI4 = mintUpNftRandom.tokenURI(4);
+    string memory URI5 = mintUpNftRandom.tokenURI(5);
+    string memory URI6 = mintUpNftRandom.tokenURI(6);
+    string memory URI7 = mintUpNftRandom.tokenURI(7);
+    string memory URI8 = mintUpNftRandom.tokenURI(8);
+    string memory URI9 = mintUpNftRandom.tokenURI(9);
+    string memory URI10 = mintUpNftRandom.tokenURI(10);
+    require(
+      keccak256(abi.encode(URI1)) != keccak256(abi.encode(URI2))
+      && keccak256(abi.encode(URI1)) != keccak256(abi.encode(URI3))
+      && keccak256(abi.encode(URI1)) != keccak256(abi.encode(URI4))
+      && keccak256(abi.encode(URI1)) != keccak256(abi.encode(URI5))
+      && keccak256(abi.encode(URI1)) != keccak256(abi.encode(URI6))
+      && keccak256(abi.encode(URI1)) != keccak256(abi.encode(URI7))
+      && keccak256(abi.encode(URI1)) != keccak256(abi.encode(URI8))
+      && keccak256(abi.encode(URI1)) != keccak256(abi.encode(URI9))
+      && keccak256(abi.encode(URI1)) != keccak256(abi.encode(URI10))
+      , "Fail Random"
+    );
+    require(
+      keccak256(abi.encode(URI2)) != keccak256(abi.encode(URI1))
+      && keccak256(abi.encode(URI2)) != keccak256(abi.encode(URI3))
+      && keccak256(abi.encode(URI2)) != keccak256(abi.encode(URI4))
+      && keccak256(abi.encode(URI2)) != keccak256(abi.encode(URI5))
+      && keccak256(abi.encode(URI2)) != keccak256(abi.encode(URI6))
+      && keccak256(abi.encode(URI2)) != keccak256(abi.encode(URI7))
+      && keccak256(abi.encode(URI2)) != keccak256(abi.encode(URI8))
+      && keccak256(abi.encode(URI2)) != keccak256(abi.encode(URI9))
+      && keccak256(abi.encode(URI2)) != keccak256(abi.encode(URI10))
+      , "Fail Random"
+    );
+    require(
+      keccak256(abi.encode(URI3)) != keccak256(abi.encode(URI2))
+      && keccak256(abi.encode(URI3)) != keccak256(abi.encode(URI1))
+      && keccak256(abi.encode(URI3)) != keccak256(abi.encode(URI4))
+      && keccak256(abi.encode(URI3)) != keccak256(abi.encode(URI5))
+      && keccak256(abi.encode(URI3)) != keccak256(abi.encode(URI6))
+      && keccak256(abi.encode(URI3)) != keccak256(abi.encode(URI7))
+      && keccak256(abi.encode(URI3)) != keccak256(abi.encode(URI8))
+      && keccak256(abi.encode(URI3)) != keccak256(abi.encode(URI9))
+      && keccak256(abi.encode(URI3)) != keccak256(abi.encode(URI10))
+      , "Fail Random"
+    );
+    require(
+      keccak256(abi.encode(URI4)) != keccak256(abi.encode(URI2))
+      && keccak256(abi.encode(URI4)) != keccak256(abi.encode(URI3))
+      && keccak256(abi.encode(URI4)) != keccak256(abi.encode(URI1))
+      && keccak256(abi.encode(URI4)) != keccak256(abi.encode(URI5))
+      && keccak256(abi.encode(URI4)) != keccak256(abi.encode(URI6))
+      && keccak256(abi.encode(URI4)) != keccak256(abi.encode(URI7))
+      && keccak256(abi.encode(URI4)) != keccak256(abi.encode(URI8))
+      && keccak256(abi.encode(URI4)) != keccak256(abi.encode(URI9))
+      && keccak256(abi.encode(URI4)) != keccak256(abi.encode(URI10))
+      , "Fail Random"
+    );
+    require(
+      keccak256(abi.encode(URI5)) != keccak256(abi.encode(URI2))
+      && keccak256(abi.encode(URI5)) != keccak256(abi.encode(URI3))
+      && keccak256(abi.encode(URI5)) != keccak256(abi.encode(URI4))
+      && keccak256(abi.encode(URI5)) != keccak256(abi.encode(URI1))
+      && keccak256(abi.encode(URI5)) != keccak256(abi.encode(URI6))
+      && keccak256(abi.encode(URI5)) != keccak256(abi.encode(URI7))
+      && keccak256(abi.encode(URI5)) != keccak256(abi.encode(URI8))
+      && keccak256(abi.encode(URI5)) != keccak256(abi.encode(URI9))
+      && keccak256(abi.encode(URI5)) != keccak256(abi.encode(URI10))
+      , "Fail Random"
+    );
+    require(
+      keccak256(abi.encode(URI6)) != keccak256(abi.encode(URI2))
+      && keccak256(abi.encode(URI6)) != keccak256(abi.encode(URI3))
+      && keccak256(abi.encode(URI6)) != keccak256(abi.encode(URI4))
+      && keccak256(abi.encode(URI6)) != keccak256(abi.encode(URI5))
+      && keccak256(abi.encode(URI6)) != keccak256(abi.encode(URI1))
+      && keccak256(abi.encode(URI6)) != keccak256(abi.encode(URI7))
+      && keccak256(abi.encode(URI6)) != keccak256(abi.encode(URI8))
+      && keccak256(abi.encode(URI6)) != keccak256(abi.encode(URI9))
+      && keccak256(abi.encode(URI6)) != keccak256(abi.encode(URI10))
+      , "Fail Random"
+    );
+    require(
+      keccak256(abi.encode(URI7)) != keccak256(abi.encode(URI2))
+      && keccak256(abi.encode(URI7)) != keccak256(abi.encode(URI3))
+      && keccak256(abi.encode(URI7)) != keccak256(abi.encode(URI4))
+      && keccak256(abi.encode(URI7)) != keccak256(abi.encode(URI5))
+      && keccak256(abi.encode(URI7)) != keccak256(abi.encode(URI6))
+      && keccak256(abi.encode(URI7)) != keccak256(abi.encode(URI1))
+      && keccak256(abi.encode(URI7)) != keccak256(abi.encode(URI8))
+      && keccak256(abi.encode(URI7)) != keccak256(abi.encode(URI9))
+      && keccak256(abi.encode(URI7)) != keccak256(abi.encode(URI10))
+      , "Fail Random"
+    );
+    require(
+      keccak256(abi.encode(URI8)) != keccak256(abi.encode(URI2))
+      && keccak256(abi.encode(URI8)) != keccak256(abi.encode(URI3))
+      && keccak256(abi.encode(URI8)) != keccak256(abi.encode(URI4))
+      && keccak256(abi.encode(URI8)) != keccak256(abi.encode(URI5))
+      && keccak256(abi.encode(URI8)) != keccak256(abi.encode(URI6))
+      && keccak256(abi.encode(URI8)) != keccak256(abi.encode(URI7))
+      && keccak256(abi.encode(URI8)) != keccak256(abi.encode(URI1))
+      && keccak256(abi.encode(URI8)) != keccak256(abi.encode(URI9))
+      && keccak256(abi.encode(URI8)) != keccak256(abi.encode(URI10))
+      , "Fail Random"
+    );
+    require(
+      keccak256(abi.encode(URI9)) != keccak256(abi.encode(URI2))
+      && keccak256(abi.encode(URI9)) != keccak256(abi.encode(URI3))
+      && keccak256(abi.encode(URI9)) != keccak256(abi.encode(URI4))
+      && keccak256(abi.encode(URI9)) != keccak256(abi.encode(URI5))
+      && keccak256(abi.encode(URI9)) != keccak256(abi.encode(URI6))
+      && keccak256(abi.encode(URI9)) != keccak256(abi.encode(URI7))
+      && keccak256(abi.encode(URI9)) != keccak256(abi.encode(URI8))
+      && keccak256(abi.encode(URI9)) != keccak256(abi.encode(URI1))
+      && keccak256(abi.encode(URI9)) != keccak256(abi.encode(URI10))
+      , "Fail Random"
+    );
+    require(
+      keccak256(abi.encode(URI10)) != keccak256(abi.encode(URI2))
+      && keccak256(abi.encode(URI10)) != keccak256(abi.encode(URI3))
+      && keccak256(abi.encode(URI10)) != keccak256(abi.encode(URI4))
+      && keccak256(abi.encode(URI10)) != keccak256(abi.encode(URI5))
+      && keccak256(abi.encode(URI10)) != keccak256(abi.encode(URI6))
+      && keccak256(abi.encode(URI10)) != keccak256(abi.encode(URI7))
+      && keccak256(abi.encode(URI10)) != keccak256(abi.encode(URI8))
+      && keccak256(abi.encode(URI10)) != keccak256(abi.encode(URI9))
+      && keccak256(abi.encode(URI10)) != keccak256(abi.encode(URI1))
+      , "Fail Random"
+    );
   }
 }
