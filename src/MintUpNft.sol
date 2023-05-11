@@ -63,12 +63,19 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
   mapping(uint256 => uint256) public tokenIDMap;
   mapping(uint256 => uint256) public takenImages;
 
+  /**
+   * @dev mapping for whitelist address that can by pass the max limit per wallet
+   *      use for crossmint and other fiat payment solution
+   */
+  mapping (address => bool) addressByPassMaxPerWallet;
+
   event NewPhase(Phase newPhase);
   event NewPublicPrice(uint256 _newPublicPrice);
   event NewWhitelistPrice(uint256 _newWhitelistPrice);
   event Premint(address to, uint256 quantity);
   event WhitelistMint(address to, uint256 quantity);
   event PublicMint(address to, uint256 quantity);
+  event AddressByPassMaxPerWallet(address account, bool status);
 
   function supportsInterface(bytes4 interfaceId)
     public
@@ -211,7 +218,9 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
   {
     if (_quantity == 0) revert quantityZero();
     if (_nextTokenId() + _quantity > maxSupply + 1) revert maxSupplyReach();
-    if (quantityPublic[_to] + _quantity > maxPerAddress) revert quantityExceed();
+    if (!addressByPassMaxPerWallet[msg.sender]) {
+      if (quantityPublic[_to] + _quantity > maxPerAddress) revert quantityExceed();
+    }
 
     _performPayment(publicPrice * _quantity);
 
@@ -361,6 +370,11 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
   function setWhitelistPrice(uint256 _newPrice) external onlyOwner {
     whitelistPrice = _newPrice;
     emit NewWhitelistPrice(_newPrice);
+  }
+
+  function setAddressByPassMaxPerWallet(address _account, bool _status) external onlyOwner {
+    addressByPassMaxPerWallet[_account] = _status;
+    emit AddressByPassMaxPerWallet(_account, _status);
   }
 
   function _startTokenId() internal override view virtual returns (uint256) {
