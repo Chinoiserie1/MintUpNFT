@@ -677,4 +677,16 @@ contract MintUpNftTest is Test {
     uint256 balanceAfter = mintUpNft.balanceOf(user1);
     require(balanceAfter == 100, "fail mint all supply");
   }
+
+  function testWhitelistMintWithUser1BuyForUser2() public {
+    mintUpNft.setPhase(Phase.whitelistMint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(address(mintUpNft), user2, 2, Phase.whitelistMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 100 ether);
+    mintUpNft.whitelistMint{ value: initETH.whitelistPrice * 2 }(user2, 2, 2, sign);
+    uint256 balanceAfter = mintUpNft.balanceOf(user2);
+    require(balanceAfter == 2, "fail mint for another account");
+  }
 }
