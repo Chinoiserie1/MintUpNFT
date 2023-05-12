@@ -730,4 +730,14 @@ contract MintUpNftTest is Test {
     vm.expectRevert(quantityZero.selector);
     mintUpNft.publicMint{ value: initETH.publicPrice }(user1, 0);
   }
+
+  function testPublicMintFailExceedMaxPerWallet() public {
+    mintUpNft.setPhase(Phase.publicMint);
+    vm.warp(block.timestamp + 101);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 20 ether);
+    vm.expectRevert(quantityExceed.selector);
+    mintUpNft.publicMint{ value: initETH.publicPrice * 11 }(user1, 11);
+  }
 }
