@@ -838,4 +838,30 @@ contract MintUpNftTest is Test {
     require(balanceMintUpAfter == amountRoyaltiesMintUp
       , "Fail transfer correct amount of royalties to mintUp");
   }
+
+  function testWithdrawByMintUp() public {
+    mintUpNft.setPhase(Phase.publicMint);
+    vm.warp(block.timestamp + 101);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 10 ether);
+    mintUpNft.publicMint{ value: initETH.publicPrice * 10 }(user1, 10);
+    uint256 balanceContract = address(mintUpNft).balance;
+    require(balanceContract == 10 ether, "fail get balance of the contract");
+    vm.stopPrank();
+    vm.startPrank(mintUpAddress);
+    address _owner = mintUpNft.owner();
+    console.log(_owner);
+    mintUpNft.withdraw();
+    uint256 balanceOwnerAfter = address(owner).balance;
+    uint256 balanceMintUpAfter = address(mintUpAddress).balance;
+    console.log(balanceOwnerAfter);
+    console.log(balanceMintUpAfter);
+    uint256 amountRoyaltiesMintUp = balanceContract * initETH.mintUpPart / 10000;
+    uint256 amountRoyaltiesOwner = balanceContract - amountRoyaltiesMintUp;
+    require(balanceOwnerAfter == amountRoyaltiesOwner
+      , "Fail transfer correct amount of royalties to owner");
+    require(balanceMintUpAfter == amountRoyaltiesMintUp
+      , "Fail transfer correct amount of royalties to mintUp");
+  }
 }
