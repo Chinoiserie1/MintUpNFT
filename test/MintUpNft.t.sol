@@ -759,4 +759,15 @@ contract MintUpNftTest is Test {
     vm.expectRevert(saleNotStarted.selector);
     mintUpNft.publicMint{ value: initETH.publicPrice * 2 }(user1, 2);
   }
+
+  function testPublicMintUser1forUser2() public {
+    mintUpNft.setPhase(Phase.publicMint);
+    vm.warp(block.timestamp + 1 hours);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 20 ether);
+    mintUpNft.publicMint{ value: initETH.publicPrice * 2 }(user2, 2);
+    uint256 balanceAfter = mintUpNft.balanceOf(user2);
+    require(balanceAfter == 2, "fail mint for user2 by user1");
+  }
 }
