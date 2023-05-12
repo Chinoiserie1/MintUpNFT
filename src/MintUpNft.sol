@@ -326,7 +326,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
    * @notice set the current phase
    * @param newPhase the new phase { IMintUpNft.sol }
    */
-  function setPhase(Phase newPhase) external {
+  function setPhase(Phase newPhase) external onlyOwner {
     currentPhase = newPhase;
     emit NewPhase(newPhase);
   }

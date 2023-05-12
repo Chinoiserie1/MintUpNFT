@@ -778,11 +778,31 @@ contract MintUpNftTest is Test {
     vm.startPrank(user1);
     bytes memory sign = signMessage(address(mintUpNft), user1, 100, Phase.premint);
     mintUpNft.premint(100, 100, sign);
+    vm.stopPrank();
+    vm.startPrank(owner);
     mintUpNft.setPhase(Phase.publicMint);
     vm.stopPrank();
     vm.startPrank(user2);
     vm.deal(user2, 20 ether);
     vm.expectRevert(maxSupplyReach.selector);
     mintUpNft.publicMint{ value: initETH.publicPrice * 2 }(user2, 2);
+  }
+
+  function testUserWhoParticipateInWhitelistMintAndPublicMaxPerWalletNotInCollision() public {
+    mintUpNft.setPhase(Phase.whitelistMint);
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 10, Phase.whitelistMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 20 ether);
+    mintUpNft.whitelistMint{ value: initETH.whitelistPrice * 10 }(user1, 10, 10, sign);
+    vm.stopPrank();
+    vm.startPrank(owner);
+    mintUpNft.setPhase(Phase.publicMint);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    mintUpNft.publicMint{ value: initETH.publicPrice * 10 }(user1, 10);
+    uint256 balanceAfter = mintUpNft.balanceOf(user1);
+    require(balanceAfter == 20, "fail mint max per wallet for whitelist and public");
   }
 }
