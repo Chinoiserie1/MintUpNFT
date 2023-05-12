@@ -134,6 +134,10 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     _;
   }
 
+  /**
+   * @notice internal function for perform Native or ERC20 payment
+   * @param _price the given price to perform
+   */
   function _performPayment(uint256 _price) internal {
     if (paymentMethod) {
       if (msg.value > 0) {
@@ -176,6 +180,13 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     emit Premint(msg.sender, _quantity);
   }
 
+  /**
+   * @notice mint function for the whitelist phase
+   * @param _to address that will receive the nft
+   * @param _quantity the amount of nft to mint
+   * @param _quantitySignature the amount of max nft can be mint in whitelist
+   * @param _signature the signature for premint
+   */
   function whitelistMint(
     address _to,
     uint256 _quantity,
@@ -204,6 +215,11 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     emit WhitelistMint(_to, _quantity);
   }
 
+  /**
+   * @notice mint function for the public phase
+   * @param _to address that will receive the nft
+   * @param _quantity the amount of nft to mint
+   */
   function publicMint(address _to, uint256 _quantity)
     external payable checkTime onlyPhase(Phase.publicMint)
   {
@@ -302,6 +318,9 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     return (computeRandom == 0 ? 1 : computeRandom);
   }
 
+  /**
+   * @notice function for withdraw the amount store in the contract
+   */
   function withdraw() external {
     address owner = owner();
     if (msg.sender != mintUp || msg.sender != owner) revert notAuthorized();
@@ -319,7 +338,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     }
   }
 
-  // SETTER
+  // SETTER ONLY OWNER
   /**
    * @notice set the current phase
    * @param newPhase the new phase { IMintUpNft.sol }
