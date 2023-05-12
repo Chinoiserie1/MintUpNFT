@@ -770,4 +770,19 @@ contract MintUpNftTest is Test {
     uint256 balanceAfter = mintUpNft.balanceOf(user2);
     require(balanceAfter == 2, "fail mint for user2 by user1");
   }
+
+  function testPublicMintFailExceedMaxSupply() public {
+    mintUpNft.setPhase(Phase.premint);
+    vm.warp(block.timestamp + 1 hours);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    bytes memory sign = signMessage(address(mintUpNft), user1, 100, Phase.premint);
+    mintUpNft.premint(100, 100, sign);
+    mintUpNft.setPhase(Phase.publicMint);
+    vm.stopPrank();
+    vm.startPrank(user2);
+    vm.deal(user2, 20 ether);
+    vm.expectRevert(maxSupplyReach.selector);
+    mintUpNft.publicMint{ value: initETH.publicPrice * 2 }(user2, 2);
+  }
 }
