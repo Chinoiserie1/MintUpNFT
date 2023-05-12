@@ -103,6 +103,12 @@ contract MintUpNftTest is Test {
     require(_royalties == _amount * initETH.royaltiesAmount / 10000);
   }
 
+  function testSetPhase() public {
+    mintUpNft.setPhase(Phase.premint);
+    Phase phase = mintUpNft.currentPhase();
+    require(phase == Phase.premint, "fail set phase");
+  }
+
   function testOwner() view public {
     address _owner = mintUpNft.owner();
     require(_owner == initETH.owner, "fail transfer ownership");

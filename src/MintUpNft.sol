@@ -37,17 +37,17 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
    * @dev false => NativeToken
    *      true => ERC20Token
    */
-  bool paymentMethod;
+  bool public paymentMethod;
   /**
    * @dev false => sequential
    *      true => random
    */
-  bool random;
+  bool public random;
 
   /**
    * @dev see { IMintUpNft.sol }
    */
-  Phase currentPhase = Phase.notStarted;
+  Phase public currentPhase = Phase.notStarted;
 
   /**
    * @dev mapping for track how many mint an address done
