@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Mit
 pragma solidity ^0.8.19;
 
-// import "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import "lib/openzeppelin-contracts/contracts/token/common/ERC2981.sol";
 import "lib/ERC721A/contracts/ERC721A.sol";
@@ -31,7 +30,6 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
   uint256 public saleTimeStarts;
   uint256 public saleTimeEnds;
   uint256 public indexerLength;
-  // uint256 public currentSupply;
 
   /**
    * @dev false => NativeToken
