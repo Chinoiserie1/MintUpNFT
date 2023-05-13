@@ -63,6 +63,8 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
   event NewPhase(Phase newPhase);
   event NewPublicPrice(uint256 _newPublicPrice);
   event NewWhitelistPrice(uint256 _newWhitelistPrice);
+  event NewSigner(address signer);
+  event NewMaxPerAddress(uint256 maxPerAddress);
   event Premint(address to, uint256 quantity);
   event WhitelistMint(address to, uint256 quantity);
   event PublicMint(address to, uint256 quantity);
@@ -364,7 +366,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
    * @notice set the new public price
    * @param _newPrice the new price for public mint
    */
-  function setNewPublicPrice(uint256 _newPrice) external onlyOwner {
+  function setPublicPrice(uint256 _newPrice) external onlyOwner {
     publicPrice = _newPrice;
     emit NewPublicPrice(_newPrice);
   }
@@ -378,10 +380,30 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     emit NewWhitelistPrice(_newPrice);
   }
 
+  /**
+   * @notice set the new signer address
+   * @param _signer address of the new signer
+   * @dev if a signer change all precedent signature will be invalid
+   */
+  function setSigner(address _signer) external onlyOwner {
+    signer = _signer;
+    emit NewSigner(_signer);
+  }
+
+  /**
+   * @notice set the new max per address can be minted
+   * @param _maxPerAddress the new amount of token can be minted
+   */
+  function setMaxPerAddress(uint256 _maxPerAddress) external onlyOwner {
+    maxPerAddress = _maxPerAddress;
+    emit NewMaxPerAddress(_maxPerAddress);
+  }
+
   function _startTokenId() internal override view virtual returns (uint256) {
     return 1;
   }
 
+  // URI
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
       uint256 imageID = tokenIDMap[tokenId];
       return (
