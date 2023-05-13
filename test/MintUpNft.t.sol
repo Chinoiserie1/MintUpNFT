@@ -71,7 +71,6 @@ contract MintUpNftTest is Test {
     init.name = "TEST";
     init.symbol = "TEST";
     init.baseURI = "baseURI/";
-    init.crossmintAddy = crossmintAddress;
     init.owner = owner;
     init.signer = signerAddress;
     init.mintUp = mintUpAddress;
