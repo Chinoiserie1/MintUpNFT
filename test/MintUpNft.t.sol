@@ -823,13 +823,9 @@ contract MintUpNftTest is Test {
     require(balanceContract == 10 ether, "fail get balance of the contract");
     vm.stopPrank();
     vm.startPrank(owner);
-    address _owner = mintUpNft.owner();
-    console.log(_owner);
     mintUpNft.withdraw();
     uint256 balanceOwnerAfter = address(owner).balance;
     uint256 balanceMintUpAfter = address(mintUpAddress).balance;
-    console.log(balanceOwnerAfter);
-    console.log(balanceMintUpAfter);
     uint256 amountRoyaltiesMintUp = balanceContract * initETH.mintUpPart / 10000;
     uint256 amountRoyaltiesOwner = balanceContract - amountRoyaltiesMintUp;
     require(balanceOwnerAfter == amountRoyaltiesOwner
@@ -849,13 +845,9 @@ contract MintUpNftTest is Test {
     require(balanceContract == 10 ether, "fail get balance of the contract");
     vm.stopPrank();
     vm.startPrank(mintUpAddress);
-    address _owner = mintUpNft.owner();
-    console.log(_owner);
     mintUpNft.withdraw();
     uint256 balanceOwnerAfter = address(owner).balance;
     uint256 balanceMintUpAfter = address(mintUpAddress).balance;
-    console.log(balanceOwnerAfter);
-    console.log(balanceMintUpAfter);
     uint256 amountRoyaltiesMintUp = balanceContract * initETH.mintUpPart / 10000;
     uint256 amountRoyaltiesOwner = balanceContract - amountRoyaltiesMintUp;
     require(balanceOwnerAfter == amountRoyaltiesOwner

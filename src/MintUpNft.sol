@@ -321,7 +321,7 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
    */
   function withdraw() external {
     address owner = owner();
-    if (msg.sender == mintUp || msg.sender == owner) {} else revert notAuthorized();
+    if (msg.sender != mintUp && msg.sender != owner) revert notAuthorized();
     if (paymentMethod) {
       uint256 _balance = IERC20(authorizedERC20).balanceOf(address(this));
       uint256 mintUpBalance = _balance * mintUpPart / 10000;
