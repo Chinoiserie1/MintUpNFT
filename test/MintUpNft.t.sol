@@ -855,4 +855,17 @@ contract MintUpNftTest is Test {
     require(balanceMintUpAfter == amountRoyaltiesMintUp
       , "Fail transfer correct amount of royalties to mintUp");
   }
+
+  function testWithdrawFailNotAuthorized() public {
+    mintUpNft.setPhase(Phase.publicMint);
+    vm.warp(block.timestamp + 101);
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.deal(user1, 10 ether);
+    mintUpNft.publicMint{ value: initETH.publicPrice * 10 }(user1, 10);
+    uint256 balanceContract = address(mintUpNft).balance;
+    require(balanceContract == 10 ether, "fail get balance of the contract");
+    vm.expectRevert(notAuthorized.selector);
+    mintUpNft.withdraw();
+  }
 }
