@@ -16,7 +16,6 @@ import "./Error/Error.sol";
  * @author chixx.eth
  */
 contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
-  address public crossmintAddy;
   address public signer;
   address public mintUp;
 
@@ -84,7 +83,6 @@ contract MintUpNft is ERC721A, ERC2981, Ownable, ERC20Payement {
     ERC721A(initParams.name, initParams.symbol)
   {
     baseURI = initParams.baseURI;
-    crossmintAddy = initParams.crossmintAddy;
     signer = initParams.signer;
     mintUp = initParams.mintUp;
     saleTimeStarts = initParams.saleTimeStarts;

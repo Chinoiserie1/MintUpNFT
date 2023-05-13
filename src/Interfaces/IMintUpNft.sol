@@ -5,7 +5,6 @@ struct Initialisaser {
   string name;
   string symbol;
   string baseURI;
-  address crossmintAddy;
   address owner;
   address signer;
   address mintUp;
