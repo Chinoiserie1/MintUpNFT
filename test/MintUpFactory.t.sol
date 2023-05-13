@@ -4,9 +4,11 @@ pragma solidity ^0.8.19;
 import "forge-std/Test.sol";
 
 import "../src/MintUpFactory.sol";
+import { MintUpNft } from "../src/MintUpNft.sol";
 
 contract MintUpFactoryTest is Test {
   MintUpFactory public mintUpFactory;
+  // MintUpNft[] public nftDeployed;
 
   uint256 internal ownerPrivateKey;
   address internal owner;
@@ -63,5 +65,14 @@ contract MintUpFactoryTest is Test {
   function testDeployNewCollection() public {
     address newCollection = mintUpFactory.deployNewCollection(setInitialisaserETH());
     require(newCollection != address(0), "fail deploy new collection");
+  }
+
+  function testGetAllDeployedCollection() public {
+    MintUpNft[] memory nftDeployed;
+    nftDeployed = mintUpFactory.getAllDeployedCollection();
+    require(nftDeployed.length == 0);
+    mintUpFactory.deployNewCollection(setInitialisaserETH());
+    nftDeployed = mintUpFactory.getAllDeployedCollection();
+    require(nftDeployed.length == 1, "fail get nft deploy");
   }
 }
