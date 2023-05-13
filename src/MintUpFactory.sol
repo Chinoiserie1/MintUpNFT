@@ -9,7 +9,7 @@ import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 error addressZero();
 
 contract MintUpFactory is Ownable {
-  MintUpNft[] public deployedCollection;
+  MintUpNft[] private deployedCollection;
 
   event NewCollectionDeployed(address indexed collectionAddress);
 
@@ -20,5 +20,9 @@ contract MintUpFactory is Ownable {
     deployedCollection.push(newCollection);
     emit NewCollectionDeployed(address(newCollection));
     return address(newCollection);
+  }
+
+  function getAllDeployedCollection() external view returns (MintUpNft[] memory) {
+    return deployedCollection;
   }
 }
