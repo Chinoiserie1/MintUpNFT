@@ -59,4 +59,9 @@ contract MintUpFactoryTest is Test {
     init.paymentMethod = false;
     return init;
   }
+
+  function testDeployNewCollection() public {
+    address newCollection = mintUpFactory.deployNewCollection(setInitialisaserETH());
+    require(newCollection != address(0), "fail deploy new collection");
+  }
 }
