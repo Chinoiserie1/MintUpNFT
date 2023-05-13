@@ -8,7 +8,6 @@ import { MintUpNft } from "../src/MintUpNft.sol";
 
 contract MintUpFactoryTest is Test {
   MintUpFactory public mintUpFactory;
-  // MintUpNft[] public nftDeployed;
 
   uint256 internal ownerPrivateKey;
   address internal owner;
@@ -65,6 +64,13 @@ contract MintUpFactoryTest is Test {
   function testDeployNewCollection() public {
     address newCollection = mintUpFactory.deployNewCollection(setInitialisaserETH());
     require(newCollection != address(0), "fail deploy new collection");
+  }
+
+  function testDeployNewCollectionFailOwnerNotSet() public {
+    Initialisaser memory init = setInitialisaserETH();
+    init.owner = address(0);
+    vm.expectRevert(addressZero.selector);
+    mintUpFactory.deployNewCollection(init);
   }
 
   function testGetAllDeployedCollection() public {
