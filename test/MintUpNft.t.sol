@@ -734,6 +734,20 @@ contract MintUpNftTest is Test {
     mintUpNftERC20.whitelistMint(user1, 5, 5, sign);
   }
 
+  function testWhitelistMintWithERC20FailNotApproved() public {
+    mintUpNftERC20.setPhase(Phase.whitelistMint);
+    mintUpNftERC20.addNewERC20(address(testERC20));
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(address(mintUpNftERC20), user1, 5, Phase.whitelistMint);
+    testERC20.transfer(user1, 10 ether);
+    uint256 amountERC20User1 = testERC20.balanceOf(user1);
+    require(amountERC20User1 == 10 ether, "fail transfer erc20");
+    vm.stopPrank();
+    vm.startPrank(user1);
+    vm.expectRevert("ERC20: insufficient allowance");
+    mintUpNftERC20.whitelistMint(user1, 5, 5, sign);
+  }
+
   // PUBLICMINT
   function testPublicMint() public {
     mintUpNft.setPhase(Phase.publicMint);
