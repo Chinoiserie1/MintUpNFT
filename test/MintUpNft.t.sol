@@ -7,10 +7,14 @@ import "../src/MintUpNft.sol";
 import "../src/Error/Error.sol";
 import "../src/Interfaces/IMintUpNft.sol";
 import { Verification } from "../src/Verification/Verification.sol";
+import { MyERC20 } from "./tokens/MyERC20.sol";
 
 contract MintUpNftTest is Test {
   MintUpNft public mintUpNft;
   MintUpNft public mintUpNftRandom;
+  MintUpNft public mintUpNftERC20;
+
+  MyERC20 public testERC20;
 
   uint256 internal ownerPrivateKey;
   address internal owner;
@@ -31,6 +35,7 @@ contract MintUpNftTest is Test {
 
   Initialisaser initETH;
   Initialisaser initETHRandom;
+  Initialisaser initERC20;
 
   function setUp() public {
     ownerPrivateKey = 0xA11CE;
@@ -53,9 +58,12 @@ contract MintUpNftTest is Test {
 
     initETH = setInitialisaserETH();
     initETHRandom = setInitialisaserETHRandom();
+    initERC20 = setInitialisaserERC20();
 
     mintUpNft = new MintUpNft(initETH);
     mintUpNftRandom = new MintUpNft(initETHRandom);
+    mintUpNftERC20 = new MintUpNft(initERC20);
+    testERC20 = new MyERC20();
   }
 
   function signMessage(address _contract, address _to, uint256 _amount, Phase _phase) internal view returns (bytes memory) {
@@ -92,6 +100,12 @@ contract MintUpNftTest is Test {
     Initialisaser memory init = setInitialisaserETH();
     init.random = true;
     init.maxSupply = 10;
+    return init;
+  }
+
+  function setInitialisaserERC20() public view returns(Initialisaser memory) {
+    Initialisaser memory init = setInitialisaserETH();
+    init.paymentMethod = true;
     return init;
   }
 
@@ -704,6 +718,20 @@ contract MintUpNftTest is Test {
     vm.deal(user1, 100 ether);
     vm.expectRevert(maxSupplyReach.selector);
     mintUpNft.whitelistMint{ value: initETH.whitelistPrice * 101 }(user1, 101, 101, sign);
+  }
+
+  function testWhitelistMintWithERC20() public {
+    mintUpNftERC20.setPhase(Phase.whitelistMint);
+    mintUpNftERC20.addNewERC20(address(testERC20));
+    vm.warp(block.timestamp + 101);
+    bytes memory sign = signMessage(address(mintUpNftERC20), user1, 5, Phase.whitelistMint);
+    testERC20.transfer(user1, 10 ether);
+    uint256 amountERC20User1 = testERC20.balanceOf(user1);
+    require(amountERC20User1 == 10 ether, "fail transfer erc20");
+    vm.stopPrank();
+    vm.startPrank(user1);
+    testERC20.approve(address(mintUpNftERC20), initERC20.whitelistPrice * 5);
+    mintUpNftERC20.whitelistMint(user1, 5, 5, sign);
   }
 
   // PUBLICMINT
